@@ -53,36 +53,6 @@ class ImmediatePayment
     public $amount;
 
     /**
-     * Card number to be credited from.
-     *
-     * For testing use 4111111111111111
-     *
-     * @var string
-     */
-    public $cardNumber;
-
-    /**
-     * Card's expiration year (four digits, e.g. 2038).
-     *
-     * @var string
-     */
-    public $cardYear;
-
-    /**
-     * Card's expiration month (from 1 to 12, not zero-padded).
-     *
-     * @var string
-     */
-    public $cardMonth;
-
-    /**
-     * CVV code.
-     *
-     * @var string
-     */
-    public $cardCode;
-
-    /**
      * Payment token.
      *
      * @var string
@@ -130,12 +100,7 @@ class ImmediatePayment
         if (isset($this->token)) {
             $this->checkRequiredVars(['token']);
         } else {
-            $this->checkRequiredVars([
-                'cardNumber',
-                'cardYear',
-                'cardMonth',
-                'cardCode',
-            ]);
+            return false;
         }
 
         // Setup transaction details (password etc)
@@ -162,15 +127,8 @@ class ImmediatePayment
         $this->execTran->OrderID = $this->paymentId;
         // copy the access keys for the transaction
         $this->execTran->setAccessID($this->entryTranResponse);
-
-        if (!isset($this->token)) {
-            // setup card number and such
-            $this->execTran->setCardNumber($this->cardNumber);
-            $this->execTran->setCardExpiryYearMonth($this->cardYear, $this->cardMonth);
-            $this->execTran->setCardSecurityCode($this->cardCode);
-        } else {
-            $this->execTran->setToken($this->token);
-        }
+        // set payment token for the transaction
+        $this->execTran->setToken($this->token);
 
         $this->execTranResponse = $this->execTran->dispatch();
 

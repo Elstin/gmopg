@@ -39,43 +39,10 @@ class ExecTran extends Magic
     public $OrderID;
     public $Method = self::LUMP_SUM_PAYMENT;
     public $PayTimes = '';
-    public $CardNo;
-    public $Expire; // YYMM
-    public $SecurityCode;
     public $Token;
     public $HttpAccept;
     public $HttpUserAgent;
     public $DeviceCategory = 0;
-
-    public function setCardNumber($number)
-    {
-        $this->CardNo = (string) $number;
-
-        return $this;
-    }
-
-    public function setCardExpiryYearMonth($year, $month)
-    {
-        $date = new \DateTime();
-        $date->setDate($year, $month, 1);
-        $this->setCardExpiry($date);
-
-        return $this;
-    }
-
-    public function setCardExpiry(\DateTime $date)
-    {
-        $this->Expire = $date->format('ym');
-
-        return $this;
-    }
-
-    public function setCardSecurityCode($cvv)
-    {
-        $this->SecurityCode = $cvv;
-
-        return $this;
-    }
 
     public function setToken($token)
     {
@@ -87,10 +54,6 @@ class ExecTran extends Magic
     public function dispatch()
     {
         $this->withRequired($this->OrderID, $this->AccessID, $this->AccessPass);
-
-        if (!isset($this->Token)) {
-            $this->withRequired($this->CardNo, $this->Expire, $this->SecurityCode);
-        }
 
         // needed by the GMO PG for whatever reasons there are
         $this->HttpAccept = $_SERVER['HTTP_ACCEPT'];
