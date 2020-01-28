@@ -30,7 +30,7 @@ namespace GMO\API;
  */
 class Constants
 {
-    const API_USER = 'MODP-3.107.105';
+    const API_USER = 'GMOPG';
     const API_VERSION = 105;
     const JOB_CD_AUTH = 'AUTH';
     const ITEM_CODE = '0000000';

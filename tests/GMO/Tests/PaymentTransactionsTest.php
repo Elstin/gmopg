@@ -29,9 +29,9 @@ use GMO\API\Call\SearchTrade;
 use GMO\API\Errors;
 use GMO\API\Response\SearchTradeResponse;
 
-class ImmediatePaymentTest extends TestCase
+class PaymentTransactionsTransaction extends TestCase
 {
-    /** @var \GMO\ImmediatePayment */
+    /** @var \GMO\PaymentTransactions */
     protected $payment;
 
     protected function setUp()
@@ -41,11 +41,11 @@ class ImmediatePaymentTest extends TestCase
         $this->assertArrayHasKey('SANDBOX_SHOP_NAME', $_SERVER, 'SANDBOX_SHOP_NAME must be defined in the environment');
     }
 
-    /** @return \GMO\ImmediatePayment */
+    /** @return \GMO\PaymentTransactions */
     private function getPayment()
     {
         // A wrapper object that does everything for you.
-        $payment = new \GMO\ImmediatePayment();
+        $payment = new \GMO\PaymentTransactions();
         $payment->testShopId = $_SERVER['SANDBOX_SHOP_ID'];
         $payment->testShopPassword = $_SERVER['SANDBOX_PASSWORD'];
         $payment->testShopName = $_SERVER['SANDBOX_SHOP_NAME'];
