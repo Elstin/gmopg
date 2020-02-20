@@ -1,5 +1,5 @@
 {
-    "name": "sanmai/gmopg",
+    "name": "elstin/gmopg",
     "description": "GMO Payment Gateway API for simple credit card payments",
     "type": "library",
     "require": {
