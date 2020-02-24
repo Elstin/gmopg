@@ -39,6 +39,16 @@ use GMO\API\Response\ExecTranResponse;
 class PaymentTransactions
 {
     /**
+     * @var string
+     */
+    public $accessId;
+
+    /**
+     * @var string
+     */
+    public $accessPass;
+
+    /**
      * Unique ID for the payment.
      *
      * @var int
@@ -58,6 +68,12 @@ class PaymentTransactions
      * @var string
      */
     public $token;
+
+    /**
+     * Job Code
+     * @var string
+     */
+    public $jobCode;
 
     private $errorShortCode;
     private $errorCode;
@@ -85,7 +101,34 @@ class PaymentTransactions
     public $testShopPassword;
     public $testShopName;
 
-    public function executeEntryTran()
+    public function cancel()
+    {
+        $this->checkRequiredVars([
+            'accessId',
+            'accessPass',
+            'jobCd'
+        ]);
+
+        $this->alterTran = new AlterTran();
+
+        if ($this->testShopId) {
+            // Use sandbox methods if requested
+            $this->entryTran->setMethods(new MethodsSandbox());
+            $this->entryTran->setShop($this->testShopId, $this->testShopPassword, $this->testShopName);
+        }
+
+        $this->alterTran->AccessID = $this->accessId;
+        $this->alterTran->AccessPass = $this->accessPass;
+        $this->alterTran->JobCd = $this->jobCode;
+        $this->alterTranResponse = $this->alterTran->dispatch();
+
+        if (!$this->verifyResponse($this->alterTranResponse)) {
+            return false;
+        }
+
+        return true;
+    }
+    public function authorization()
     {
         $this->checkRequiredVars([
             'paymentId',
@@ -141,79 +184,6 @@ class PaymentTransactions
         }
 
         return $this->execTranResponse;
-    }
-    /**
-     * Proceeds with a payment. Can be done just once for a single payment ID.
-     *
-     * @return bool if a valid response received
-     */
-    public function execute()
-    {
-        $this->checkRequiredVars([
-            'paymentId',
-            'amount',
-        ]);
-
-        if (isset($this->token)) {
-            $this->checkRequiredVars(['token']);
-        } else {
-            return false;
-        }
-
-        // Setup transaction details (password etc)
-        $this->entryTran = new EntryTran();
-
-        if ($this->testShopId) {
-            // Use sandbox methods if requested
-            $this->entryTran->setMethods(new MethodsSandbox());
-            $this->entryTran->setShop($this->testShopId, $this->testShopPassword, $this->testShopName);
-        }
-
-        $this->entryTran->OrderID = $this->paymentId;
-        $this->entryTran->Amount = $this->amount;
-        $this->entryTranResponse = $this->entryTran->dispatch();
-
-        if (!$this->verifyResponse($this->entryTranResponse)) {
-            return false;
-        }
-
-        $this->execTran = new ExecTran();
-        // configure this request using earlier request's data
-        $this->entryTran->setupOther($this->execTran);
-        // payment ID must be the same as before
-        $this->execTran->OrderID = $this->paymentId;
-        // copy the access keys for the transaction
-        $this->execTran->setAccessID($this->entryTranResponse);
-        // set payment token for the transaction
-        $this->execTran->setToken($this->token);
-
-        $this->execTranResponse = $this->execTran->dispatch();
-
-        if (!$this->verifyResponse($this->execTranResponse)) {
-            // @codeCoverageIgnoreStart
-            return false; // this should never happen under normal circumstances
-            // @codeCoverageIgnoreEnd
-        }
-
-        // verify the checksum
-        if (!$this->execTran->verifyResponse($this->execTranResponse)) {
-            // @codeCoverageIgnoreStart
-            return false; // this should never happen under normal circumstances
-            // @codeCoverageIgnoreEnd
-        }
-
-        $this->alterTran = new AlterTran();
-        // configure this request using earlier request's data
-        $this->entryTran->setupOther($this->alterTran);
-        // copy the access keys
-        $this->alterTran->setAccessID($this->entryTranResponse);
-        // confirm the payment amount
-        $this->alterTran->setActualSaleAmount($this->amount);
-
-        $this->alterTranResponse = $this->alterTran->dispatch();
-
-        // this should never return false under normal circumstances
-        return $this->verifyResponse($this->alterTranResponse);
     }
 
     /**
