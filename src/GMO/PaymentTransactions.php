@@ -106,7 +106,7 @@ class PaymentTransactions
         $this->checkRequiredVars([
             'accessId',
             'accessPass',
-            'jobCd'
+            'jobCode'
         ]);
 
         $this->alterTran = new AlterTran();
