@@ -101,7 +101,7 @@ class PaymentTransactions
     public $testShopPassword;
     public $testShopName;
 
-    public function alterTran()
+    public function cancel()
     {
         $this->checkRequiredVars([
             'accessId',
@@ -128,6 +128,37 @@ class PaymentTransactions
 
         return true;
     }
+
+    public function commitSales()
+    {
+        $this->checkRequiredVars([
+            'accessId',
+            'accessPass',
+            'jobCode',
+            'amount'
+        ]);
+
+        $this->alterTran = new AlterTran();
+
+        if ($this->testShopId) {
+            // Use sandbox methods if requested
+            $this->entryTran->setMethods(new MethodsSandbox());
+            $this->entryTran->setShop($this->testShopId, $this->testShopPassword, $this->testShopName);
+        }
+
+        $this->alterTran->AccessID = $this->accessId;
+        $this->alterTran->AccessPass = $this->accessPass;
+        $this->alterTran->JobCd = $this->jobCode;
+        $this->alterTran->setActualSaleAmount($this->amount);
+        $this->alterTranResponse = $this->alterTran->dispatch();
+
+        if (!$this->verifyResponse($this->alterTranResponse)) {
+            return false;
+        }
+
+        return true;
+    }
+
     public function authorization()
     {
         $this->checkRequiredVars([
