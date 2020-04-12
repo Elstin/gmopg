@@ -101,7 +101,7 @@ class PaymentTransactions
     public $testShopPassword;
     public $testShopName;
 
-    public function cancel()
+    public function alterTran()
     {
         $this->checkRequiredVars([
             'accessId',
